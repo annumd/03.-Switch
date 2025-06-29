@@ -3,37 +3,247 @@
   <head>
     <title>Switch</title>
     <style>
-      body {
-        background-color: black;
-        color: white;
-        transition: background-color 0.5s, color 0.5s;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
+
+      body {
+        background: #000000;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      body.light-mode {
+        background: #ffffff;
+        color: #000000;
+      }
+
+      .container {
+        text-align: center;
+        z-index: 1;
+      }
+
+      .title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+      }
+
+      .light-mode .title {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .switch-container {
+        position: relative;
+        display: inline-block;
+        margin: 2rem 0;
+      }
+
       .switch {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .switch:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .switch::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 52px;
+        height: 52px;
+        background: #ffffff;
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .switch.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+
+      .switch.active::before {
+        transform: translateX(60px);
+        background: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .light-mode .switch {
+        background: rgba(0, 0, 0, 0.1);
+        border-color: rgba(0, 0, 0, 0.2);
+      }
+
+      .light-mode .switch::before {
+        background: #000000;
+      }
+
+      .light-mode .switch.active {
+        background: rgba(0, 0, 0, 0.2);
+        border-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .light-mode .switch.active::before {
+        background: #000000;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .icon {
         position: absolute;
         top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+        z-index: 2;
+      }
+
+      .moon-icon {
+        left: 18px;
+        color: #ffffff;
+      }
+
+      .sun-icon {
+        right: 18px;
+        color: #ffffff;
+        opacity: 0;
+      }
+
+      .light-mode .moon-icon {
+        color: #000000;
+      }
+
+      .light-mode .sun-icon {
+        color: #000000;
+      }
+
+      .switch.active .moon-icon {
+        opacity: 0;
+      }
+
+      .switch.active .sun-icon {
+        opacity: 1;
+      }
+
+      .floating-particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: float 6s infinite linear;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      .light-mode .particle {
+        background: rgba(0, 0, 0, 0.2);
       }
     </style>
   </head>
   <body>
-    <label class="switch">
-      <input type="checkbox" id="themeSwitch">
-      <span>Switch</span>
-    </label>
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="container">
+      <h1 class="title">Switch It</h1>
+      
+      <div class="switch-container">
+        <label class="switch" for="themeSwitch">
+          <input type="checkbox" id="themeSwitch">
+          <span class="icon moon-icon">🌙</span>
+          <span class="icon sun-icon">☀️</span>
+        </label>
+      </div>
+    </div>
 
     <script>
       const checkbox = document.getElementById('themeSwitch');
+      const body = document.body;
+      const switchElement = document.querySelector('.switch');
+      const particlesContainer = document.getElementById('particles');
+
+      // Create floating particles
+      function createParticles() {
+        for (let i = 0; i < 20; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.animationDelay = Math.random() * 6 + 's';
+          particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+          particlesContainer.appendChild(particle);
+        }
+      }
+
+      createParticles();
+
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) {
-          document.body.style.backgroundColor = "white";
-          document.body.style.color = "black";
+          body.classList.add('light-mode');
+          switchElement.classList.add('active');
         } else {
-          document.body.style.backgroundColor = "black";
-          document.body.style.color = "white";
+          body.classList.remove('light-mode');
+          switchElement.classList.remove('active');
         }
+      });
+
+      // Add click animation
+      switchElement.addEventListener('click', () => {
+        switchElement.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          switchElement.style.transform = '';
+        }, 150);
       });
     </script>
   </body>
 </html>
-
