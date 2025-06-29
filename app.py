@@ -8,7 +8,7 @@ def index():
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Toggle Theme</title>
+    <title>Switch</title>
     <style>
       body {
         background-color: black;
@@ -26,7 +26,7 @@ def index():
   <body>
     <label class="switch">
       <input type="checkbox" id="themeSwitch">
-      <span>Toggle</span>
+      <span>Switch</span>
     </label>
 
     <script>
